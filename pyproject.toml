@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dyson-markdown-tuning-panels"
+version = "0.1.0"
+description = "Typed, persistent, interactive slider panels declared in Jupyter Markdown cells"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{name = "918 Technologies"}]
+keywords = ["jupyter", "markdown", "ipywidgets", "sliders", "model-tuning", "configuration"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Framework :: Jupyter",
+  "Operating System :: OS Independent",
+  "License :: Other/Proprietary License",
+]
+dependencies = ["ipywidgets>=8.0,<9", "nbformat>=5.7,<6"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff>=0.7"]
+
+[project.scripts]
+dyson-markdown = "dyson_markdown.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

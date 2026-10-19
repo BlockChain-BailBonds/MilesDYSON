@@ -1,0 +1,27 @@
+name: Python tests
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.10', '3.12']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install
+        run: python -m pip install -e '.[dev]'
+      - name: Check Python formatting and errors
+        run: ruff check src tests
+      - name: Execute tests
+        run: python -m pytest -q
+      - name: Validate source notebook
+        run: dyson-markdown validate examples/dyson_source.ipynb
+      - name: Generate executable notebook
+        run: dyson-markdown compile examples/dyson_source.ipynb -o /tmp/dyson_compiled.ipynb
