@@ -50,9 +50,8 @@ def validate_value(control: dict[str, Any], value: Any) -> Any:
             raise DysonError(f"{name} must be one of its declared options")
         return value
     numeric = _number(value, name)
-    if kind == "int":
-        if not isinstance(value, int):
-            raise DysonError(f"{name} must be an integer")
+    if kind == "int" and not isinstance(value, int):
+        raise DysonError(f"{name} must be an integer")
     minimum = control["min"]
     maximum = control["max"]
     step = control["step"]

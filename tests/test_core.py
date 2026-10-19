@@ -9,10 +9,9 @@ from dyson_markdown import (
     StateStore,
     compile_notebook,
     extract_panels,
-    validate_panel,
     validate_notebook,
+    validate_panel,
 )
-
 
 PANEL = {
     "id": "inference",

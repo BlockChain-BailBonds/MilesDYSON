@@ -4,9 +4,11 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from typing import Any
+
 import nbformat
 
-from .core import DysonError, _PATTERN, extract_panels
+from .core import _PATTERN, DysonError, extract_panels
 
 _AUTO_TAG = "dyson-generated-widget"
 
