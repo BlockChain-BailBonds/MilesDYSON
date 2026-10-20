@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import os
+import socket
 import subprocess
 import time
 from pathlib import Path
@@ -76,6 +77,12 @@ class ManagedLlama:
             raise ConfigError("llama-server must be an executable file")
         if not weights.is_file():
             raise ConfigError("local GGUF model file not found")
+        # Refuse to attach accidentally to an unrelated server on the selected port.
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as probe:
+            try:
+                probe.bind(("127.0.0.1", port))
+            except OSError as exc:
+                raise ConfigError("backend port is already in use") from exc
         args = [str(binary), "-m", str(weights), "--host", "127.0.0.1", "--port", str(port),
                 "--alias", "dyson-local", "-c", str(context_size), "-ngl", str(gpu_layers)]
         if mmproj:

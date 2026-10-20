@@ -2,6 +2,9 @@
 from __future__ import annotations
 
 import json
+import os
+import socket
+import sys
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.error import HTTPError
@@ -12,7 +15,7 @@ import pytest
 from dyson.backend import BackendError, ManagedLlama
 from dyson.cli import main
 from dyson.client import DysonClient
-from dyson.config import ConfigError, ConflictError, DEFAULTS, Settings, validate
+from dyson.config import DEFAULTS, ConfigError, ConflictError, Settings, validate
 from dyson.equalizer import Equalizer
 from dyson.runtime import Runtime
 from dyson.server import Server
@@ -263,3 +266,55 @@ def test_newer_feedback_supersedes_older_session_feedback(running):
     with pytest.raises(BackendError, match="409"):
         client.observe(first["request_id"], changed=False, level="old")
     assert client.status()["sessions"]["ordered"]["known_outcomes"] == 1
+
+
+@pytest.mark.skipif(os.name == "nt", reason="fixture uses a POSIX executable script")
+def test_managed_process_readiness_and_shutdown(tmp_path):
+    executable = tmp_path / "contract-server"
+    executable.write_text("#!" + sys.executable + "\n" + """
+import argparse
+import json
+from http.server import BaseHTTPRequestHandler, HTTPServer
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--port", type=int)
+args, unused = parser.parse_known_args()
+
+class Handler(BaseHTTPRequestHandler):
+    def log_message(self, *args):
+        pass
+
+    def do_GET(self):
+        body = json.dumps({"data": [{"id": "managed-contract-only"}]}).encode()
+        self.send_response(200)
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+HTTPServer(("127.0.0.1", args.port), Handler).serve_forever()
+""")
+    executable.chmod(0o700)
+    weights = tmp_path / "contract-only.gguf"
+    weights.write_bytes(b"TEST CONTRACT ASSET; NOT MODEL WEIGHTS")
+    with socket.socket() as probe:
+        probe.bind(("127.0.0.1", 0))
+        port = probe.getsockname()[1]
+    managed = ManagedLlama(executable, weights, tmp_path, port=port)
+    try:
+        managed.wait_ready({**DEFAULTS, "endpoint": f"http://127.0.0.1:{port}/v1"}, timeout=10)
+        assert managed.process.poll() is None
+    finally:
+        managed.close()
+    assert managed.process.poll() is not None
+    assert managed.log.closed
+
+
+def test_managed_process_rejects_occupied_port(tmp_path):
+    weights = tmp_path / "contract-only.gguf"
+    weights.write_bytes(b"CONTRACT ONLY")
+    with socket.socket() as occupied:
+        occupied.bind(("127.0.0.1", 0))
+        occupied.listen()
+        port = occupied.getsockname()[1]
+        with pytest.raises(ConfigError, match="already in use"):
+            ManagedLlama(sys.executable, weights, tmp_path, port=port)
