@@ -4,28 +4,33 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dyson-markdown-tuning-panels"
-version = "0.1.0"
-description = "Typed, persistent, interactive slider panels declared in Jupyter Markdown cells"
+version = "0.2.0"
+description = "Standalone DYSON model controls, adaptive equalizer, local dashboard and optional notebook panels"
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [{name = "918 Technologies"}]
-keywords = ["jupyter", "markdown", "ipywidgets", "sliders", "model-tuning", "configuration"]
+keywords = ["dyson", "model-tuning", "local-inference", "equalizer", "918-technologies"]
 classifiers = [
   "Programming Language :: Python :: 3",
-  "Framework :: Jupyter",
   "Operating System :: OS Independent",
   "License :: Other/Proprietary License",
 ]
-dependencies = ["ipywidgets>=8.0,<9", "nbformat>=5.7,<6"]
+dependencies = []
 
 [project.optional-dependencies]
-dev = ["pytest>=8", "ruff>=0.7"]
+notebook = ["ipywidgets>=8.0,<9", "nbformat>=5.7,<6"]
+dev = ["pytest>=8,<10", "ruff>=0.7,<1", "build>=1,<2", "ipywidgets>=8.0,<9", "nbformat>=5.7,<6"]
+ui = ["playwright>=1.48,<2"]
 
 [project.scripts]
+dyson = "dyson.cli:main"
 dyson-markdown = "dyson_markdown.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+dyson = ["dashboard.html"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

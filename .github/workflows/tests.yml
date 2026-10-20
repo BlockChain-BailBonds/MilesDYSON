@@ -17,11 +17,36 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install
         run: python -m pip install -e '.[dev]'
-      - name: Check Python formatting and errors
+      - name: Check Python errors
         run: ruff check src tests
       - name: Execute tests
         run: python -m pytest -q
-      - name: Validate source notebook
-        run: dyson-markdown validate examples/dyson_source.ipynb
-      - name: Generate executable notebook
-        run: dyson-markdown compile examples/dyson_source.ipynb -o /tmp/dyson_compiled.ipynb
+      - name: Preserve notebook compatibility
+        run: |
+          dyson-markdown validate examples/dyson_source.ipynb
+          dyson-markdown compile examples/dyson_source.ipynb -o /tmp/dyson_compiled.ipynb
+      - name: Build standalone distributions
+        run: python -m build
+      - name: Verify isolated wheel without notebook dependencies
+        run: |
+          python -m venv /tmp/dyson-isolated
+          /tmp/dyson-isolated/bin/pip install --no-deps dist/*.whl
+          /tmp/dyson-isolated/bin/dyson --help
+          /tmp/dyson-isolated/bin/dyson --state-dir /tmp/dyson-wheel-state config
+          /tmp/dyson-isolated/bin/python -c "from importlib.resources import files; import importlib.util; assert files('dyson').joinpath('dashboard.html').is_file(); assert importlib.util.find_spec('ipywidgets') is None"
+      - uses: actions/upload-artifact@v4
+        if: matrix.python-version == '3.12'
+        with:
+          name: dyson-standalone-distributions
+          path: dist/
+  browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -e '.[dev,ui]'
+      - run: python -m playwright install --with-deps chromium
+      - name: Verify actual slider interaction and persistence in Chromium
+        run: python -m pytest tests/test_dashboard_browser.py -q
