@@ -76,12 +76,12 @@ def validate(values):
         raise ConfigError("equalizer_enabled must be boolean")
     for key, (low, high) in RANGES.items():
         value = out[key]
-        if type(value) not in (int, float) or not math.isfinite(value):
+        if type(value) not in (int, float):
             raise ConfigError(f"{key} must be finite and numeric")
         if key in INTEGER_KEYS and type(value) is not int:
             raise ConfigError(f"{key} must be an integer")
-        if not low <= value <= high:
-            raise ConfigError(f"{key} must be between {low} and {high}")
+        if not low <= value <= high or not math.isfinite(value):
+            raise ConfigError(f"{key} must be finite and between {low} and {high}")
     if out["min_observations"] > out["evidence_window"]:
         raise ConfigError("min_observations must not exceed evidence_window")
     if out["min_tokens"] > out["max_tokens"]:

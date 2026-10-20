@@ -115,6 +115,7 @@ def test_changed_settings_expire_pending_feedback(running):
 
 @pytest.mark.parametrize("patch", [
     {"temperature": float("nan")}, {"temperature": True}, {"max_tokens": 1.5},
+    {"temperature": 10**1000},
     {"model": ""}, {"endpoint": "http://example.com:8080/v1"},
     {"endpoint": "http://127.0.0.1:8080/v1?secret=x"},
     {"endpoint": "http://user:password@127.0.0.1:8080/v1"},

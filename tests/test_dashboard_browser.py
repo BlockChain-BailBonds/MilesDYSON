@@ -26,6 +26,7 @@ class BrowserBackend:
 def test_sliders_control_request_and_persist_across_browser_reload(tmp_path):
     backend = BrowserBackend()
     with Runtime(tmp_path, backend=backend) as runtime, Server(("127.0.0.1", 0), runtime) as server:
+        runtime.configure({"top_p": 0.9333}, 0)
         thread = threading.Thread(target=server.serve_forever, daemon=True)
         thread.start()
         try:
@@ -42,11 +43,12 @@ def test_sliders_control_request_and_persist_across_browser_reload(tmp_path):
                 for _ in range(5):
                     slider.press("ArrowRight")
                 page.locator("#apply").click()
-                playwright.expect(page.locator("#revision")).to_contain_text("Saved revision 1")
+                playwright.expect(page.locator("#revision")).to_contain_text("Saved revision 2")
                 page.locator("#prompt").fill("test local model contract")
                 page.locator("#send").click()
                 playwright.expect(page.locator("#reply")).to_have_text("browser-contract-output")
                 assert backend.parameters[-1]["temperature"] == 0.25
+                assert backend.parameters[-1]["top_p"] == 0.9333
                 page.locator("#progress").click()
                 playwright.expect(page.locator("#sessions")).to_contain_text('"known_outcomes": 1')
                 assert runtime.status()["sessions"]["dashboard"]["known_outcomes"] == 1

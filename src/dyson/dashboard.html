@@ -47,6 +47,7 @@ input:focus,textarea:focus,button:focus{outline:2px solid #59dfc2;outline-offset
 const token="__DYSON_TOKEN__";
 const el=id=>document.getElementById(id);
 let revision=0, latest=null, dirty=false, busy=false;
+const changedControls=new Set();
 const fields=[
 ["temperature","Temperature",0,2,0.05],["top_p","Top-p",0.01,1,0.01],
 ["max_tokens","Maximum output tokens",128,8192,128],
@@ -59,7 +60,7 @@ for(const [key,label,min,max,step] of fields){
  const node=document.createElement("label");node.htmlFor=key;node.append(document.createTextNode(label));
  const value=document.createElement("span");value.id=key+"_value";value.className="value";node.append(value);
  const slider=document.createElement("input");slider.type="range";slider.id=key;slider.min=min;slider.max=max;slider.step=step;
- slider.addEventListener("input",()=>{value.textContent=slider.value;dirty=true;});
+ slider.addEventListener("input",()=>{value.textContent=slider.value;dirty=true;changedControls.add(key);});
  el("controls").append(node,slider);
 }
 for(const key of ["endpoint","model","equalizer_enabled"])el(key).addEventListener("input",()=>{dirty=true;});
@@ -80,7 +81,7 @@ async function refresh(force=false){
    input.value=value;el(key+"_value").textContent=value;
   }
   el("endpoint").value=status.settings.values.endpoint;el("model").value=status.settings.values.model;
-  el("equalizer_enabled").checked=status.settings.values.equalizer_enabled;dirty=false;
+  el("equalizer_enabled").checked=status.settings.values.equalizer_enabled;dirty=false;changedControls.clear();
  }
  el("revision").textContent="Saved revision "+status.settings.revision+(dirty?" · unapplied changes":"");
  el("sessions").textContent=JSON.stringify(status.sessions,null,2);
@@ -90,7 +91,7 @@ async function refresh(force=false){
 function feedbackButtons(disabled){for(const id of ["progress","noop","unknown"])el(id).disabled=disabled;}
 el("apply").addEventListener("click",async()=>{try{
  const values={endpoint:el("endpoint").value,model:el("model").value,equalizer_enabled:el("equalizer_enabled").checked};
- for(const [key]of fields)values[key]=Number(el(key).value);
+ for(const key of changedControls)values[key]=Number(el(key).value);
  await api("config",{values,revision});latest=null;feedbackButtons(true);await refresh(true);el("error").textContent="";
 }catch(error){fail(error);}});
 el("reload").addEventListener("click",()=>refresh(true).catch(fail));
