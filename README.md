@@ -10,6 +10,12 @@ The standalone core uses Python's standard library and has no required third-par
 runtime dependencies. An actual local model backend is required for inference.
 DYSON does not include model weights or a llama.cpp binary.
 
+## Recorded benchmark results
+
+The owner's **SkyNet°MilesDyson** notebook run on Kaggle RTX Pro 6000 recorded a **64.25 mean**, **62.76 median**, **12 wins across 25 games**, and **nine scores of 100.00** during the October 21–22, 2026 overnight run.
+
+See [results and original evidence](RESULTS.md) for all 25 scores, screenshots, source provenance, and a machine-readable record. The captured run was still in progress. These are notebook/harness measurements; an official leaderboard result and the standalone tuner's isolated effect are not established by this record.
+
 ## Install and launch
 
 Requires Python 3.10 or newer. From this repository:
@@ -229,7 +235,8 @@ Python 3.12 builds attach wheel and source distributions to the workflow run.
 Contract tests use a clearly labeled test backend. They establish wiring,
 persistence, validation, and controller behavior. Real GGUF inference, GPU
 compatibility, model accuracy, and official competition scores require a run
-with your model and hardware. No benchmark score is bundled or fabricated.
+with your model and hardware. [Recorded notebook-run evidence](RESULTS.md) is
+provided separately; contract tests do not establish those benchmark results.
 
 **Copyright © 2026 918 Technologies. All rights reserved.**
 See [NOTICE.md](NOTICE.md). Existing ownership terms are unchanged.
