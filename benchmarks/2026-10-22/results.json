@@ -1,0 +1,261 @@
+{
+  "schema_version": 1,
+  "record_id": "skynet-milesdyson-2026-10-22-observed",
+  "recorded_on": "2026-10-22",
+  "notebook_title_as_displayed": "SkyNet°MilesDyson",
+  "benchmark_name": "duck-harness-kaggle",
+  "solver": "duck-harness",
+  "measurement_scope": "Kaggle notebook/harness benchmark snapshot",
+  "run_status_as_displayed": "in progress",
+  "run_start_as_displayed": "2026-10-22 00:13:37",
+  "run_start_timezone": null,
+  "official_leaderboard_score": null,
+  "official_leaderboard_rank": null,
+  "standalone_only_effect": null,
+  "summary": {
+    "diagnostics_log_elapsed_s": 23514,
+    "games": 25,
+    "passes": 1,
+    "runs": 25,
+    "wins": 12,
+    "mean_score_reported": 64.25,
+    "median_score_reported": 62.76,
+    "total_actions_reported": 16476,
+    "total_tokens_reported": 11733083,
+    "generated_tokens_per_s_reported": 523.12,
+    "generated_tokens_per_s_basis": "job wallclock",
+    "perfect_score_games_from_transcription": 9,
+    "score_scale_max": 100
+  },
+  "hardware": {
+    "platform": "Kaggle",
+    "accelerator_as_displayed": "GPU RTX Pro 6000"
+  },
+  "evidence": {
+    "format": "Owner-supplied original screenshots; manually transcribed and visually checked.",
+    "summary_source": "1000365713.jpg",
+    "per_game_scores_span_two_diagnostics_refreshes": true,
+    "files": [
+      {
+        "file_name": "1000365713.jpg",
+        "size_bytes": 120800,
+        "sha256": "ad7bcba11830da5c3435fe14e8e142ef4c0d6e28bfb2728c5ab91ca0c75bbadf",
+        "path": "benchmarks/2026-10-22/evidence/1000365713.jpg",
+        "description": "Summary and first eight per-game scores, log lines 1718–1740.",
+        "diagnostics_log_elapsed_s": 23514
+      },
+      {
+        "file_name": "1000365715.jpg",
+        "size_bytes": 141815,
+        "sha256": "db95b92fdaac67d7fc1d00cabd7db089c31827af45b755fefb2a56839237d0e0",
+        "path": "benchmarks/2026-10-22/evidence/1000365715.jpg",
+        "description": "Remaining seventeen per-game scores, log lines 1890–1906.",
+        "diagnostics_log_elapsed_s": 26296.2
+      }
+    ]
+  },
+  "related_notebook_source": {
+    "file_name": "skynet-milesdyson.ipynb",
+    "identical_copy_names": [
+      "skynet-milesdyson(1).ipynb",
+      "skynet-milesdyson(2).ipynb"
+    ],
+    "size_bytes": 621408,
+    "sha256": "a56a59afd0b685d36fd38eb74131751ae99c453ce573772507253abaa1409fb7",
+    "execution_outputs_present": false,
+    "relationship": "Owner-supplied source associated with the run; executing Kaggle revision was not independently captured.",
+    "later_modified_copy": {
+      "file_name": "skynet-milesdyson(3).ipynb",
+      "sha256": "70896a31a894fe8395c02ca3b4c5b373f600e1c11270428263054f68c8c0f1f5",
+      "relationship": "Later edited source; its changes are not validated by this score record."
+    }
+  },
+  "validation": {
+    "transcribed_game_count": 25,
+    "unique_game_count": 25,
+    "mean_from_rounded_per_game_scores": 64.2512,
+    "mean_rounded_to_2dp": 64.25,
+    "median_from_rounded_per_game_scores": 62.76,
+    "summary_matches_transcribed_scores": true,
+    "final_run_log_available": false,
+    "official_scorecard_available": false,
+    "controlled_tuner_on_off_comparison_available": false
+  },
+  "per_game_scores": [
+    {
+      "game": "AR25",
+      "score": 100,
+      "evidence_file": "1000365713.jpg",
+      "diagnostics_log_elapsed_s": 23514,
+      "diagnostics_log_line": 1733
+    },
+    {
+      "game": "BP35",
+      "score": 0.01,
+      "evidence_file": "1000365713.jpg",
+      "diagnostics_log_elapsed_s": 23514,
+      "diagnostics_log_line": 1734
+    },
+    {
+      "game": "CD82",
+      "score": 5.81,
+      "evidence_file": "1000365713.jpg",
+      "diagnostics_log_elapsed_s": 23514,
+      "diagnostics_log_line": 1735
+    },
+    {
+      "game": "CN04",
+      "score": 100,
+      "evidence_file": "1000365713.jpg",
+      "diagnostics_log_elapsed_s": 23514,
+      "diagnostics_log_line": 1736
+    },
+    {
+      "game": "DC22",
+      "score": 47.43,
+      "evidence_file": "1000365713.jpg",
+      "diagnostics_log_elapsed_s": 23514,
+      "diagnostics_log_line": 1737
+    },
+    {
+      "game": "FT09",
+      "score": 62.76,
+      "evidence_file": "1000365713.jpg",
+      "diagnostics_log_elapsed_s": 23514,
+      "diagnostics_log_line": 1738
+    },
+    {
+      "game": "G50T",
+      "score": 31.96,
+      "evidence_file": "1000365713.jpg",
+      "diagnostics_log_elapsed_s": 23514,
+      "diagnostics_log_line": 1739
+    },
+    {
+      "game": "KA59",
+      "score": 56.6,
+      "evidence_file": "1000365713.jpg",
+      "diagnostics_log_elapsed_s": 23514,
+      "diagnostics_log_line": 1740
+    },
+    {
+      "game": "LF52",
+      "score": 5.93,
+      "evidence_file": "1000365715.jpg",
+      "diagnostics_log_elapsed_s": 26296.2,
+      "diagnostics_log_line": 1890
+    },
+    {
+      "game": "LP85",
+      "score": 100,
+      "evidence_file": "1000365715.jpg",
+      "diagnostics_log_elapsed_s": 26296.2,
+      "diagnostics_log_line": 1891
+    },
+    {
+      "game": "LS20",
+      "score": 33.31,
+      "evidence_file": "1000365715.jpg",
+      "diagnostics_log_elapsed_s": 26296.2,
+      "diagnostics_log_line": 1892
+    },
+    {
+      "game": "M0R0",
+      "score": 100,
+      "evidence_file": "1000365715.jpg",
+      "diagnostics_log_elapsed_s": 26296.2,
+      "diagnostics_log_line": 1893
+    },
+    {
+      "game": "R11L",
+      "score": 100,
+      "evidence_file": "1000365715.jpg",
+      "diagnostics_log_elapsed_s": 26296.2,
+      "diagnostics_log_line": 1894
+    },
+    {
+      "game": "RE86",
+      "score": 58.33,
+      "evidence_file": "1000365715.jpg",
+      "diagnostics_log_elapsed_s": 26296.2,
+      "diagnostics_log_line": 1895
+    },
+    {
+      "game": "S5I5",
+      "score": 100,
+      "evidence_file": "1000365715.jpg",
+      "diagnostics_log_elapsed_s": 26296.2,
+      "diagnostics_log_line": 1896
+    },
+    {
+      "game": "SB26",
+      "score": 83.83,
+      "evidence_file": "1000365715.jpg",
+      "diagnostics_log_elapsed_s": 26296.2,
+      "diagnostics_log_line": 1897
+    },
+    {
+      "game": "SC25",
+      "score": 100,
+      "evidence_file": "1000365715.jpg",
+      "diagnostics_log_elapsed_s": 26296.2,
+      "diagnostics_log_line": 1898
+    },
+    {
+      "game": "SK48",
+      "score": 9.83,
+      "evidence_file": "1000365715.jpg",
+      "diagnostics_log_elapsed_s": 26296.2,
+      "diagnostics_log_line": 1899
+    },
+    {
+      "game": "SP80",
+      "score": 48.8,
+      "evidence_file": "1000365715.jpg",
+      "diagnostics_log_elapsed_s": 26296.2,
+      "diagnostics_log_line": 1900
+    },
+    {
+      "game": "SU15",
+      "score": 47.04,
+      "evidence_file": "1000365715.jpg",
+      "diagnostics_log_elapsed_s": 26296.2,
+      "diagnostics_log_line": 1901
+    },
+    {
+      "game": "TN36",
+      "score": 52.81,
+      "evidence_file": "1000365715.jpg",
+      "diagnostics_log_elapsed_s": 26296.2,
+      "diagnostics_log_line": 1902
+    },
+    {
+      "game": "TR87",
+      "score": 100,
+      "evidence_file": "1000365715.jpg",
+      "diagnostics_log_elapsed_s": 26296.2,
+      "diagnostics_log_line": 1903
+    },
+    {
+      "game": "TU93",
+      "score": 92.54,
+      "evidence_file": "1000365715.jpg",
+      "diagnostics_log_elapsed_s": 26296.2,
+      "diagnostics_log_line": 1904
+    },
+    {
+      "game": "VC33",
+      "score": 100,
+      "evidence_file": "1000365715.jpg",
+      "diagnostics_log_elapsed_s": 26296.2,
+      "diagnostics_log_line": 1905
+    },
+    {
+      "game": "WA30",
+      "score": 69.29,
+      "evidence_file": "1000365715.jpg",
+      "diagnostics_log_elapsed_s": 26296.2,
+      "diagnostics_log_line": 1906
+    }
+  ]
+}

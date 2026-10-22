@@ -1,120 +1,242 @@
-# DYSON — Markdown Tuning Panels 🎚️
+# DYSON — Standalone Model Control
 
-**918 Technologies · Public repository edition · v0.1.0**
+**918 Technologies · v0.2.0**
 
-DYSON turns **declarative tuning specifications written in Jupyter Markdown** into executable, interactive Python widget panels. Sliders are backed by a persistent, typed configuration object that the model, solver, or other code can read on subsequent cells.
+DYSON runs as an independent local application. Its browser dashboard, authenticated API,
+CLI, configuration store, telemetry, and adaptive inference controller work without
+Kaggle, ARC, Jupyter, or the SuperDuper harness. Notebook panels remain an optional integration.
 
-**This is not decorative HTML.** `IntSlider` and `FloatSlider` widgets change saved values; `get(panel, key)` delivers those values to Python runtime code.
+The standalone core uses Python's standard library and has no required third-party
+runtime dependencies. An actual local model backend is required for inference.
+DYSON does not include model weights or a llama.cpp binary.
 
-## What actually works
+## Recorded benchmark results
 
-- Markdown cells contain fenced `dyson` JSON specifications; the compiler preserves the original declaration in notebook cell metadata, hides its verbose JSON in the compiled view, and inserts an interactive widget cell immediately afterward.
-- Real draggable **integer/float sliders**, on/off toggles, and dropdowns via `ipywidgets`.
-- Slider changes persist atomically to `.dyson/settings.json` when released; **Apply / Save** and **Reset panel** buttons are available.
-- Input typing, bounds, increments, nonfinite-number rejection, duplicate-name detection, and persisted-value validation.
-- Repeatable notebook compilation without duplicating widget cells.
-- Integration from later code cells with `get("panel_id", "key")` and `snapshot()`.
+The owner's **SkyNet°MilesDyson** notebook run on Kaggle RTX Pro 6000 recorded a **64.25 mean**, **62.76 median**, **12 wins across 25 games**, and **nine scores of 100.00** during the October 21–22, 2026 overnight run.
 
-### Platform boundaries
+See [results and original evidence](RESULTS.md) for all 25 scores, screenshots, source provenance, and a machine-readable record. The captured run was still in progress. These are notebook/harness measurements; an official leaderboard result and the standalone tuner's isolated effect are not established by this record.
 
-**Jupyter Notebook / JupyterLab**: works when the notebook frontend supports `ipywidgets` and widget managers.
+## Install and launch
 
-**Kaggle / Colab / VS Code notebooks**: can work when their specific kernels/frontends support the installed widget protocol; platform-specific testing is still necessary.
-
-**GitHub Markdown, plain Markdown previewers, README renderers**: show the `dyson` schema as static text/code, not live Python-bound sliders. Executing sliders directly *inside an arbitrary rendered Markdown cell on every platform* needs each platform's extension or adapter. This repository does not claim such universal support yet.
-
-## Quick start
+Requires Python 3.10 or newer. From this repository:
 
 ```bash
-python -m pip install -e .
-dyson-markdown validate examples/dyson_source.ipynb
-dyson-markdown compile examples/dyson_source.ipynb --output examples/dyson_compiled.ipynb
+python -m pip install .
+dyson serve
 ```
 
-Open `examples/dyson_compiled.ipynb` in Jupyter and **Run All**, or run each generated control cell before the consuming code. The compiled view shows the Markdown heading followed by **actual sliders**; the JSON declaration stays in the source notebook and the compiled cell metadata for lossless recompilation. Drag the sliders; the values are saved and read by the example's subsequent cells.
+Open **http://127.0.0.1:9180**. The dashboard starts independently of the model backend.
+It will report a backend error until a compatible local model server is available.
 
-### Markdown declaration
+The distribution retains its existing package name,
+`dyson-markdown-tuning-panels`, for compatibility. The standalone command is `dyson`.
 
-Put this in a Markdown cell (including its backtick fences):
+### Connect an existing local backend
 
-````markdown
-## Qwen model tuning
-
-```dyson
-{
-  "id": "inference",
-  "title": "Qwen inference settings",
-  "controls": [
-    {"key": "temperature", "label": "Temperature", "type": "float", "min": 0, "max": 2, "step": 0.05, "default": 0.65},
-    {"key": "draft_tokens", "label": "Speculative draft tokens", "type": "int", "min": 1, "max": 32, "step": 1, "default": 8},
-    {"key": "speculative", "label": "Use draft model", "type": "bool", "default": true}
-  ]
-}
-```
-````
-
-Then compile your notebook:
+Use a local server implementing `GET /v1/models` and
+`POST /v1/chat/completions`, such as llama-server. Stop DYSON before configuring
+from the CLI, or apply changes through the dashboard while it is running.
 
 ```bash
-dyson-markdown compile original.ipynb -o dyson_enabled.ipynb
+dyson config --set '{"endpoint":"http://127.0.0.1:8080/v1","model":"my-local-model"}'
+dyson serve
 ```
 
-Code cells below can consume your actual settings:
+Endpoint URLs must use loopback HTTP with an explicit port and `/v1`.
+The backend must be configured without API authentication. DYSON's own API has
+separate token authentication.
 
-```python
-from dyson_markdown import get, snapshot
+### Let DYSON start and own llama-server
 
-sampling_temperature = get("inference", "temperature")
-draft_token_count = get("inference", "draft_tokens")
-speculative_enabled = get("inference", "speculative")
-print(snapshot("inference"))
+Supply an installed executable and your actual local GGUF model:
+
+```bash
+dyson serve --llama-server /opt/llama.cpp/build/bin/llama-server --model-path /models/model.gguf --gpu-layers 0
 ```
 
-These variables must be passed to a **compatible serving/model adapter**; merely changing a slider cannot magically reconfigure a running model instance. Live model servers may need restart or configuration reload before changes take effect.
+For a multimodal model, add `--mmproj /models/mmproj.gguf`.
+For a compatible CUDA build and available GPU memory, set the desired
+`--gpu-layers`. CPU is the default. Model compatibility, required RAM/VRAM, and
+context capacity depend on your model and llama.cpp build.
 
-## Run integration
+The model process binds to 127.0.0.1:8080 with alias `dyson-local`.
+Use `--backend-port` to change that port and `--context-size` to change the
+startup context allocation. Split GGUFs must have all shards together; pass the
+first shard. Nothing is downloaded automatically.
 
-| Parameter | UI control | Effect |
+DYSON waits for model readiness and stops its owned model process on shutdown.
+A model process you started separately stays under your control.
+Startup output is written to `llama-server.log` in the state directory.
+Backend startup options require restarting the owned model process;
+sampling controls apply on the next request.
+
+## What the equalizer does
+
+The standalone controller preserves the notebook v10 policy's four modes.
+Each session keeps separate observed outcomes and measured request latencies.
+
+| Mode | Evidence | Effect |
 | --- | --- | --- |
-| Floating-point range | `FloatSlider` | Validated floating-point setting |
-| Integer range | `IntSlider` | Validated integer setting |
-| Boolean | `ToggleButton` | On/off feature gate |
-| Enumerated options | `Dropdown` | Select an available backend or mode |
+| BASELINE | Insufficient or inconclusive evidence | Original configured request parameters |
+| RECOVERY | Consecutive observed no-ops and low progress rate | Restore the full configured output budget |
+| MOMENTUM | At least 70% recent observed progress and at least three positive outcomes | Reduce output budget using progress multiplier |
+| ECONOMY | At least three measured slow requests and mixed, insufficient progress | Reduce output budget using economy multiplier |
 
-For Kaggle use, add the package source to the notebook's available files (or its wheelhouse), install it in the running environment, compile the notebook locally before uploading, and use a writable path for settings. To override settings persistence:
+The default controller needs four known outcomes and enforces a three-request
+cooldown between mode changes. It considers a rolling window of twelve outcomes.
+Unknown outcomes are counted separately and never treated as no-ops.
+Explicit level changes clear old-level evidence and restore BASELINE.
+Disabling adaptation preserves configured parameters.
 
-```python
-import os
-os.environ["DYSON_STATE_PATH"] = "/kaggle/working/dyson_settings.json"
+Only the output-token budget changes automatically in this version.
+Temperature, top-p, seed, and the maximum budget remain explicit user settings.
+The controller does not mutate model weights, impose gameplay action limits,
+or infer task success from fluent text. Reduced tokens are an efficiency heuristic;
+improved accuracy or score is not established by the implementation.
+
+Use the dashboard's **Observed progress**, **Observed no change**, or
+**Outcome unknown** buttons after inspecting an actual outcome. Application
+adapters can report those outcomes through the API. Caller-reported observations
+are labeled as such; they are not official scores.
+
+The generic standalone controller does not include the ARC harness's prompt
+injection hooks or reasoning/deadline overrides. Those belong in an ARC adapter,
+which may use the API without making ARC a dependency.
+
+## CLI
+
+```bash
+dyson --help
+dyson config
+dyson config --set '{"temperature":0.25,"max_tokens":2048}'
+dyson serve --port 9180
+dyson doctor
+dyson chat "Explain the difference between evidence and a prediction."
+dyson status
 ```
 
-Set that environment variable **before importing or initializing** DYSON. This does not bypass Kaggle network restrictions, competition policies, GPU resource limits, model-availability requirements, or the official scoring protocol.
+Use `--state-dir /path/to/state` **before** the subcommand or set `DYSON_HOME`.
+The default is `~/.dyson`. Client commands accept `--port` after their subcommand.
+The same state directory and API port must be used by service and clients.
 
-## Repository contents
+Only one process may own a state directory. While the service is running,
+update configuration through the dashboard, Python client, or HTTP API.
+CLI errors return exit status 2.
 
-| Location | Purpose |
-| --- | --- |
-| `src/dyson_markdown/core.py` | Typed schema, Markdown parser, persistent settings |
-| `src/dyson_markdown/widgets.py` | Actual interactive widgets and live value observers |
-| `src/dyson_markdown/notebook.py` | Safe, idempotent Markdown-to-widget notebook compilation |
-| `src/dyson_markdown/cli.py` | Validate/compile command line |
-| `examples/dyson_source.ipynb` | Editable Markdown declarations and consuming Python cells |
-| `examples/dyson_compiled.ipynb` | Runnable notebook with interactive panels |
-| `tests/` | Validation, widget wiring, persistence, and compilation tests |
-| `.github/workflows/tests.yml` | Automated test workflow |
+## Python / notebook / ARC adapter
 
-## Quality checks
+Start DYSON once, then connect from any Python application:
+
+```python
+from pathlib import Path
+from dyson.client import DysonClient
+
+client = DysonClient(token_file=Path.home() / ".dyson" / "api-token")
+result = client.chat(
+    [{"role": "user", "content": "Inspect the current task."}],
+    session_id="my-agent",
+)
+print(result["message"])
+print(result["parameters"], result["settings_revision"])
+
+# Only report a change after your application observes a real outcome.
+observed_change = None
+client.observe(result["request_id"], changed=observed_change, level="level-1")
+```
+
+Text, multimodal image messages, and tool definitions can be forwarded to a
+capable backend. Tool calls are returned to the caller; DYSON never executes
+model-requested tools. ARC actions and official scoring remain the adapter's job.
+
+Feedback is accepted once per successful request and must reference its returned
+`request_id`. At most 256 recent requests can await feedback. Newer feedback in
+a session supersedes older outstanding feedback from that session, preventing
+delayed observations from reversing level order. Reconfiguring DYSON clears
+pending feedback and adaptive evidence. Settings persist across service restarts;
+adaptive evidence intentionally starts fresh.
+
+## Local HTTP API
+
+All API requests require `Authorization: Bearer TOKEN` or
+`X-Dyson-Token: TOKEN`. Read the private token from the state directory's
+`api-token` file. The token changes on service restart. The dashboard supplies it
+automatically.
+
+| Method | Route | Body / result |
+| --- | --- | --- |
+| GET | /api/status | Settings revision, session modes, recent telemetry |
+| GET | /api/health | Real backend model-list probe |
+| POST | /api/config | `{"revision":0,"values":{"temperature":0.25}}` |
+| POST | /api/chat | `{"session_id":"agent","messages":[{"role":"user","content":"Hello"}]}` |
+| POST | /api/feedback | `{"request_id":"returned-id","changed":true,"completed":false,"level":"level-1"}` |
+
+A stale configuration revision, duplicate feedback, or busy inference request
+returns HTTP 409. Invalid input returns 400; missing authentication returns 401;
+invalid Host or cross-origin access returns 403; backend failures return 502.
+Only one model inference runs at a time. API request bodies are limited to 2 MiB.
+Backend responses are limited to 8 MiB. Session identifiers are bounded to 128
+ASCII letters, digits, underscores, periods, colons, and hyphens.
+
+The dashboard binds exclusively to 127.0.0.1 and is intended for personal local
+use. Token authentication, origin/Host checks, a content security policy, bounded
+connections, and disabled backend redirects protect the local control interface.
+The root dashboard page is available without an API token to local browser
+users; this is not a multi-user or remotely exposed service.
+
+## Persistence and telemetry
+
+Settings are validated before an atomic replacement and written with private
+file permissions. Revisions protect against stale UI writes. A process lock
+prevents concurrent writers to the same state directory.
+
+`events.jsonl` records actual request latency, effective parameters, mode,
+backend-provided token usage, revisions, and caller-reported outcomes. Prompts,
+responses, and bearer tokens are excluded. Missing token usage remains unknown.
+The event log rotates at roughly 5 MiB, retaining one previous file.
+The dashboard shows up to 100 recent process events.
+
+The managed backend's own log is separate and follows the installed backend's
+logging behavior. Do not share it without checking its contents.
+
+## Optional Markdown notebook panels
+
+```bash
+python -m pip install '.[notebook]'
+dyson-markdown validate examples/dyson_source.ipynb
+dyson-markdown compile examples/dyson_source.ipynb -o examples/dyson_compiled.ipynb
+```
+
+Notebook controls require a frontend supporting ipywidgets. Static Markdown
+renderers remain static. Existing `dyson_markdown` APIs are preserved.
+The standalone browser dashboard needs no notebook renderer.
+
+## Verification and packaged downloads
 
 ```bash
 python -m pip install -e '.[dev]'
 ruff check src tests
-pytest -q
+python -m pytest -q
+python -m build
 ```
 
-There is no fabricated ARC-AGI score or benchmark attached. Software tests validate widget behavior; competition scores can only be established by executing a genuine competition run.
+For actual browser interaction tests:
 
-## Security and ownership
+```bash
+python -m pip install -e '.[dev,ui]'
+python -m playwright install chromium
+python -m pytest tests/test_dashboard_browser.py -q
+```
 
-All user-supplied declarations are read as **JSON**, not as executable Python; no `eval` or injected JavaScript is needed. Persisted settings are validated before use. Never put secrets into Markdown panel definitions or committed notebook outputs.
+GitHub Actions runs Python 3.10/3.12 tests, HTTP backend contract tests,
+notebook compatibility checks, an isolated wheel install without notebook
+dependencies, and a Chromium slider-to-request persistence test. Successful
+Python 3.12 builds attach wheel and source distributions to the workflow run.
 
-**Copyright © 2026 918 Technologies. All rights reserved.** Public visibility is not permission to reuse or distribute the source code. See [NOTICE.md](NOTICE.md). No open-source license has been granted.
+Contract tests use a clearly labeled test backend. They establish wiring,
+persistence, validation, and controller behavior. Real GGUF inference, GPU
+compatibility, model accuracy, and official competition scores require a run
+with your model and hardware. [Recorded notebook-run evidence](RESULTS.md) is
+provided separately; contract tests do not establish those benchmark results.
+
+**Copyright © 2026 918 Technologies. All rights reserved.**
+See [NOTICE.md](NOTICE.md). Existing ownership terms are unchanged.
